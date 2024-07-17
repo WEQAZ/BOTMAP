@@ -7,18 +7,16 @@ import "react-datepicker/dist/react-datepicker.css";
 import React from "react";
 
 export default function Home() {
-  const [popupMessage, setPopupMessage] = useState("");
-  const [showPopup, setShowPopup] = useState(false);
   const [events, setEvents] = useState([]);
-  const eventsRef = useRef<any>([]);
+  const eventsRef = useRef([]);
   const [currentTime, setCurrentTime] = useState(new Date());
   const currentTimeRef = useRef(new Date());
+  const [objectStatuses, setObjectStatuses] = useState({});
 
   useEffect(() => {
     const initialTime = new Date();
     setCurrentTime(initialTime);
     currentTimeRef.current = initialTime;
-    // setCurrentTime(new Date());
     const startDate = "2024-07-01";
     const endDate = "2024-07-31";
 
@@ -27,87 +25,58 @@ export default function Home() {
         const data = await fetchTeamupEvents(startDate, endDate);
         setEvents(data.events);
         eventsRef.current = data.events;
-        console.log("Fetch events data:", data.events);
+        console.log("Fetched events data:", data.events);
+        updateObjectStatuses(data.events, initialTime);
       } catch (error) {
         console.error("Error fetching events:", error);
       }
     }
 
     getEvents();
+    const interval = setInterval(() => {
+      getEvents();
+      updateObjectStatuses(eventsRef.current, currentTimeRef.current);
+    }, 60000); // Fetch events and update statuses every minute
+
+    return () => clearInterval(interval);
   }, []);
 
-  function onLoad(spline: any) {
-    console.log("Spline scene loaded");
-  }
+  useEffect(() => {
+    updateObjectStatuses(eventsRef.current, currentTime);
+  }, [currentTime]);
 
-  function onSplineMouseDown(event: any) {
-    const targetName = event.target?.name;
-    console.log("All Events", eventsRef.current);
-    console.log("Mouse down event:", event);
-
-    if (targetName) {
-      const filteredEvents = filterEvents(targetName, currentTimeRef.current);
-      if (filteredEvents.length > 0) {
-        const popupContent = createPopupContent(filteredEvents);
-        setPopupMessage(popupContent);
-        setShowPopup(true);
-        setTimeout(() => setShowPopup(false), 5000); // Hide popup after 5 seconds
-      } else {
-        console.log(
-          `No events found for ${targetName} at ${currentTimeRef.current}`
-        );
+  function updateObjectStatuses(events, time) {
+    const statuses = {};
+    events.forEach((event) => {
+      const isCurrentEvent =
+        new Date(event.start_dt) <= time && new Date(event.end_dt) >= time;
+      if (!statuses[event.location]) {
+        statuses[event.location] = [];
       }
-    } else {
-      console.log("Clicked on something else or target is undefined");
-    }
-  }
-
-  function filterEvents(targetName: any, time: Date) {
-    return eventsRef.current.filter(
-      (event: {
-        location: any;
-        start_dt: string | number | Date;
-        end_dt: string | number | Date;
-      }) => {
-        console.log("Filtering time:", time);
-        return (
-          event.location === targetName &&
-          new Date(event.start_dt) <= time &&
-          new Date(event.end_dt) >= time
-        );
+      if (isCurrentEvent) {
+        statuses[event.location].push(event);
       }
-    );
-  }
-
-  function createPopupContent(filteredEvents: any[]) {
-    return filteredEvents
-      .map(
-        (event) =>
-          `<div key=${event.id}>
-        <h3>${event.title}</h3>
-        <p>Location : ${event.location}</p>
-        <p>Start: ${new Date(event.start_dt).toLocaleString()}</p>
-        <p>End: ${new Date(event.end_dt).toLocaleString()}</p>
-      </div>`
-      )
-      .join("");
-  }
-
-  function moveTime(hours: number) {
-    setCurrentTime((prevTime) => {
-      const newTime = new Date(prevTime.getTime() + hours * 60 * 60 * 1000);
-      currentTimeRef.current = newTime; // Update the ref immediately
-      console.log(`Time updated to: ${newTime}`);
-      return newTime;
     });
+    setObjectStatuses(statuses);
   }
 
-  function handleDateChange(date: Date | null) {
+  function handleDateChange(date) {
     if (date) {
       setCurrentTime(date);
       currentTimeRef.current = date;
       console.log(`Time updated to: ${date}`);
+      updateObjectStatuses(eventsRef.current, date);
     }
+  }
+
+  function moveTime(hours) {
+    setCurrentTime((prevTime) => {
+      const newTime = new Date(prevTime.getTime() + hours * 60 * 60 * 1000);
+      currentTimeRef.current = newTime; // Update the ref immediately
+      console.log(`Time updated to: ${newTime}`);
+      updateObjectStatuses(eventsRef.current, newTime);
+      return newTime;
+    });
   }
 
   return (
@@ -115,17 +84,26 @@ export default function Home() {
       <Suspense fallback={<div>Loading...</div>}>
         <Spline
           scene="https://prod.spline.design/M7CPMgEoaMdQKmU0/scene.splinecode"
-          onLoad={onLoad}
-          onSplineMouseDown={onSplineMouseDown}
         />
       </Suspense>
 
-      {showPopup && (
-        <div
-          className="popup"
-          dangerouslySetInnerHTML={{ __html: popupMessage }}
-        ></div>
-      )}
+      <div className="statuses">
+        {Object.entries(objectStatuses).map(([object, events]) => (
+          <div key={object} className="status">
+            <h3>
+              <span className={`status-dot ${(events as any[]).length > 0 ? 'red' : 'green'}`}></span>
+              {object}
+            </h3>
+            {Array.isArray(events) && events.length > 0 ? (
+              <div
+                dangerouslySetInnerHTML={{ __html: createPopupContent(events) }}
+              ></div>
+            ) : (
+              <p>No events</p>
+            )}
+          </div>
+        ))}
+      </div>
 
       <div className="timeline">
         <button onClick={() => moveTime(-1)}>◀ 1 Hour</button>
@@ -141,17 +119,37 @@ export default function Home() {
       </div>
 
       <style jsx>{`
-        .popup {
+        .statuses {
           position: absolute;
           top: 20px;
-          left: 20px;
-          background-color: white;
-          border: 1px solid black;
+          right: 20px;
+          background-color: rgba(255, 255, 255, 0.8);
           padding: 10px;
-          z-index: 100;
+          border-radius: 5px;
           max-width: 300px;
           max-height: 400px;
           overflow-y: auto;
+        }
+        .status {
+          margin-bottom: 10px;
+        }
+        .status h3 {
+          display: flex;
+          align-items: center;
+          margin: 0 0 5px 0;
+        }
+        .status-dot {
+          display: inline-block;
+          width: 10px;
+          height: 10px;
+          border-radius: 50%;
+          margin-right: 8px;
+        }
+        .status-dot.red {
+          background-color: red;
+        }
+        .status-dot.green {
+          background-color: green;
         }
         .timeline {
           position: absolute;
@@ -180,4 +178,18 @@ export default function Home() {
       `}</style>
     </main>
   );
+
+  function createPopupContent(filteredEvents) {
+    return filteredEvents
+      .map(
+        (event) =>
+          `<div key=${event.id}>
+        <h3>${event.title}</h3>
+        <p>Location: ${event.location}</p>
+        <p>Start: ${new Date(event.start_dt).toLocaleString()}</p>
+        <p>End: ${new Date(event.end_dt).toLocaleString()}</p>
+      </div>`
+      )
+      .join("");
+  }
 }
