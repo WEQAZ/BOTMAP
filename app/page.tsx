@@ -8,10 +8,12 @@ import React from "react";
 
 export default function Home() {
   const [events, setEvents] = useState([]);
-  const eventsRef = useRef([]);
+  const eventsRef = useRef<any>([]);
   const [currentTime, setCurrentTime] = useState(new Date());
   const currentTimeRef = useRef(new Date());
   const [objectStatuses, setObjectStatuses] = useState({});
+  const [popupMessage, setPopupMessage] = useState("");
+  const [showPopup, setShowPopup] = useState(false);
 
   useEffect(() => {
     const initialTime = new Date();
@@ -60,6 +62,45 @@ export default function Home() {
     setObjectStatuses(statuses);
   }
 
+  function onSplineMouseDown(event: any) {
+    const targetName = event.target?.name;
+    console.log("All Events", eventsRef.current);
+    console.log("Mouse down event:", event);
+
+    if (targetName) {
+      const filteredEvents = filterEvents(targetName, currentTimeRef.current);
+      if (filteredEvents.length > 0) {
+        const popupContent = createPopupContent(filteredEvents);
+        setPopupMessage(popupContent);
+        setShowPopup(true);
+        setTimeout(() => setShowPopup(false), 5000); // Hide popup after 5 seconds
+      } else {
+        console.log(
+          `No events found for ${targetName} at ${currentTimeRef.current}`
+        );
+      }
+    } else {
+      console.log("Clicked on something else or target is undefined");
+    }
+  }
+
+  function filterEvents(targetName: any, time: Date) {
+    return eventsRef.current.filter(
+      (event: {
+        location: any;
+        start_dt: string | number | Date;
+        end_dt: string | number | Date;
+      }) => {
+        console.log("Filtering time:", time);
+        return (
+          event.location === targetName &&
+          new Date(event.start_dt) <= time &&
+          new Date(event.end_dt) >= time
+        );
+      }
+    );
+  }
+
   function handleDateChange(date) {
     if (date) {
       setCurrentTime(date);
@@ -84,14 +125,25 @@ export default function Home() {
       <Suspense fallback={<div>Loading...</div>}>
         <Spline
           scene="https://prod.spline.design/M7CPMgEoaMdQKmU0/scene.splinecode"
+          onSplineMouseDown={onSplineMouseDown}
         />
       </Suspense>
+      {showPopup && (
+        <div
+          className="popup"
+          dangerouslySetInnerHTML={{ __html: popupMessage }}
+        ></div>
+      )}
 
       <div className="statuses">
         {Object.entries(objectStatuses).map(([object, events]) => (
           <div key={object} className="status">
             <h3>
-              <span className={`status-dot ${(events as any[]).length > 0 ? 'red' : 'green'}`}></span>
+              <span
+                className={`status-dot ${
+                  (events as any[]).length > 0 ? "red" : "green"
+                }`}
+              ></span>
               {object}
             </h3>
             {Array.isArray(events) && events.length > 0 ? (
@@ -120,6 +172,7 @@ export default function Home() {
 
       <style jsx>{`
         .statuses {
+          color: black;
           position: absolute;
           top: 20px;
           right: 20px;
@@ -174,6 +227,19 @@ export default function Home() {
           width: 200px;
           padding: 5px;
           font-size: 14px;
+        }
+        .popup {
+          color: black;
+          position: absolute;
+          top: 20px;
+          left: 20px;
+          background-color: white;
+          border: 1px solid black;
+          padding: 10px;
+          z-index: 100;
+          max-width: 300px;
+          max-height: 400px;
+          overflow-y: auto;
         }
       `}</style>
     </main>
