@@ -162,6 +162,7 @@ export default function Home() {
         <DatePicker
           selected={currentTime}
           onChange={handleDateChange}
+          minDate={new Date()}
           showTimeSelect
           timeFormat="HH:mm"
           timeIntervals={60}
