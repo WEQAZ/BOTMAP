@@ -124,7 +124,7 @@ export default function Home() {
     <main>
       <Suspense fallback={<div>Loading...</div>}>
         <Spline
-          scene="https://prod.spline.design/M7CPMgEoaMdQKmU0/scene.splinecode"
+          scene="https://prod.spline.design/GVOmVf1B30xEIUWb/scene.splinecode"
           onSplineMouseDown={onSplineMouseDown}
         />
       </Suspense>
