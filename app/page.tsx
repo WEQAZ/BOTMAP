@@ -20,7 +20,7 @@ export default function Home() {
     setCurrentTime(initialTime);
     currentTimeRef.current = initialTime;
     const startDate = "2024-07-01";
-    const endDate = "2024-07-31";
+    const endDate = "2024-09-31";
 
     async function getEvents() {
       try {
