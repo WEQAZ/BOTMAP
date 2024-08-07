@@ -25,10 +25,11 @@ export default function Home() {
     async function getEvents() {
       try {
         const data = await fetchTeamupEvents(startDate, endDate);
-        setEvents(data.events);
-        eventsRef.current = data.events;
-        console.log("Fetched events data:", data.events);
-        updateObjectStatuses(data.events, initialTime);
+        const filteredData = data.events.filter(event => event.location.startsWith("4"));
+        setEvents(filteredData);
+        eventsRef.current = filteredData;
+        console.log("Fetched events data:", filteredData);
+        updateObjectStatuses(filteredData, initialTime);
       } catch (error) {
         console.error("Error fetching events:", error);
       }
@@ -94,12 +95,14 @@ export default function Home() {
         console.log("Filtering time:", time);
         return (
           event.location === targetName &&
+          event.location.startsWith("4") &&
           new Date(event.start_dt) <= time &&
           new Date(event.end_dt) >= time
         );
       }
     );
   }
+  
 
   function handleDateChange(date) {
     if (date) {
