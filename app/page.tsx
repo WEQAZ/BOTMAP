@@ -1,10 +1,11 @@
 "use client";
 import { useRef, useState, useEffect, Suspense } from "react";
 import Spline from "@splinetool/react-spline";
-import { fetchTeamupEvents } from "../api/teamup";
+import { createTeamupEvent, fetchTeamupEvents } from "../api/teamup";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import React from "react";
+import ReservationModal from "../components/ReservationModal";
 
 export default function Home() {
   const [events, setEvents] = useState([]);
@@ -14,6 +15,8 @@ export default function Home() {
   const [objectStatuses, setObjectStatuses] = useState({});
   const [popupMessage, setPopupMessage] = useState("");
   const [showPopup, setShowPopup] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedRoom, setSelectedRoom] = useState(null);
 
   useEffect(() => {
     const initialTime = new Date();
@@ -25,7 +28,9 @@ export default function Home() {
     async function getEvents() {
       try {
         const data = await fetchTeamupEvents(startDate, endDate);
-        const filteredData = data.events.filter(event => event.location.startsWith("4"));
+        const filteredData = data.events.filter((event) =>
+          event.location.startsWith("4")
+        );
         setEvents(filteredData);
         eventsRef.current = filteredData;
         console.log("Fetched events data:", filteredData);
@@ -65,23 +70,34 @@ export default function Home() {
 
   function onSplineMouseDown(event: any) {
     const targetName = event.target?.name;
-    console.log("All Events", eventsRef.current);
     console.log("Mouse down event:", event);
 
-    if (targetName) {
-      const filteredEvents = filterEvents(targetName, currentTimeRef.current);
-      if (filteredEvents.length > 0) {
-        const popupContent = createPopupContent(filteredEvents);
-        setPopupMessage(popupContent);
-        setShowPopup(true);
-        setTimeout(() => setShowPopup(false), 5000); // Hide popup after 5 seconds
-      } else {
-        console.log(
-          `No events found for ${targetName} at ${currentTimeRef.current}`
-        );
-      }
+    if (targetName && targetName.startsWith("4")) {
+      setSelectedRoom(targetName);
+      setIsModalOpen(true);
     } else {
       console.log("Clicked on something else or target is undefined");
+    }
+  }
+
+  async function handleReservationSubmit(reservationData) {
+    try {
+      const newEvent = await createTeamupEvent(reservationData);
+      console.log("New event created:", newEvent);
+      // Refresh events after creating a new one
+      const startDate = "2024-07-01";
+      const endDate = "2024-09-31";
+      const data = await fetchTeamupEvents(startDate, endDate);
+      const filteredData = data.events.filter((event) =>
+        event.location.startsWith("4")
+      );
+      setEvents(filteredData);
+      eventsRef.current = filteredData;
+      updateObjectStatuses(filteredData, currentTimeRef.current);
+      setIsModalOpen(false);
+    } catch (error) {
+      console.error("Error creating event:", error);
+      // Handle error (e.g., show error message to user)
     }
   }
 
@@ -102,7 +118,6 @@ export default function Home() {
       }
     );
   }
-  
 
   function handleDateChange(date) {
     if (date) {
@@ -137,7 +152,13 @@ export default function Home() {
           dangerouslySetInnerHTML={{ __html: popupMessage }}
         ></div>
       )}
-
+      <ReservationModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSubmit={handleReservationSubmit}
+        selectedRoom={selectedRoom}
+        currentTime={currentTime}
+      />
       <div className="statuses">
         {Object.entries(objectStatuses).map(([object, events]) => (
           <div key={object} className="status">
