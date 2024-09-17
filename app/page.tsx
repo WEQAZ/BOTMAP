@@ -34,7 +34,7 @@ export default function Home() {
         setEvents(filteredData);
         eventsRef.current = filteredData;
         console.log("Fetched events data:", filteredData);
-        updateObjectStatuses(filteredData, initialTime);
+        updateObjectStatuses(filteredData, currentTimeRef.current);
       } catch (error) {
         console.error("Error fetching events:", error);
       }
@@ -43,7 +43,7 @@ export default function Home() {
     getEvents();
     const interval = setInterval(() => {
       getEvents();
-      updateObjectStatuses(eventsRef.current, currentTimeRef.current);
+      // updateObjectStatuses(eventsRef.current, currentTimeRef.current);
     }, 60000); // Fetch events and update statuses every minute
 
     return () => clearInterval(interval);
