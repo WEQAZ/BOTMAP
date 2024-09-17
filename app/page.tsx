@@ -19,12 +19,9 @@ export default function Home() {
   const [selectedRoom, setSelectedRoom] = useState(null);
 
   useEffect(() => {
-    const initialTime = new Date();
-    setCurrentTime(initialTime);
-    currentTimeRef.current = initialTime;
     const startDate = "2024-07-01";
     const endDate = "2024-09-31";
-
+  
     async function getEvents() {
       try {
         const data = await fetchTeamupEvents(startDate, endDate);
@@ -34,20 +31,22 @@ export default function Home() {
         setEvents(filteredData);
         eventsRef.current = filteredData;
         console.log("Fetched events data:", filteredData);
+        // Only update object statuses without changing the current time
         updateObjectStatuses(filteredData, currentTimeRef.current);
       } catch (error) {
         console.error("Error fetching events:", error);
       }
     }
-
+  
     getEvents();
-    const interval = setInterval(() => {
-      getEvents();
-      // updateObjectStatuses(eventsRef.current, currentTimeRef.current);
-    }, 60000); // Fetch events and update statuses every minute
+  const interval = setInterval(() => {
+    getEvents();
+    // Keep updating object statuses without resetting current time
+    updateObjectStatuses(eventsRef.current, currentTimeRef.current);
+  }, 60000); // Fetch events and update statuses every minute
 
-    return () => clearInterval(interval);
-  }, []);
+  return () => clearInterval(interval);
+}, []);
 
   useEffect(() => {
     updateObjectStatuses(eventsRef.current, currentTime);
@@ -131,13 +130,13 @@ export default function Home() {
   function moveTime(hours) {
     setCurrentTime((prevTime) => {
       const newTime = new Date(prevTime.getTime() + hours * 60 * 60 * 1000);
-      currentTimeRef.current = newTime; // Update the ref immediately
       console.log(`Time updated to: ${newTime}`);
+      currentTimeRef.current = newTime; // Update the ref immediately
+      // Only update object statuses when the time is changed by the user
       updateObjectStatuses(eventsRef.current, newTime);
       return newTime;
     });
   }
-
   return (
     <main>
       <Suspense fallback={<div>Loading...</div>}>
