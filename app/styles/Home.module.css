@@ -1,23 +1,3 @@
-/* styles/Home.module.css */
-
-.main {
-  position: relative;
-}
-
-.popup {
-  color: black;
-  position: absolute;
-  top: 20px;
-  left: 20px;
-  background-color: white;
-  border: 1px solid black;
-  padding: 10px;
-  z-index: 100;
-  max-width: 300px;
-  max-height: 400px;
-  overflow-y: auto;
-}
-
 .statuses {
   color: black;
   position: absolute;
@@ -49,11 +29,11 @@
   margin-right: 8px;
 }
 
-.red {
+.statusDotRed {
   background-color: red;
 }
 
-.green {
+.statusDotGreen {
   background-color: green;
 }
 
@@ -73,4 +53,28 @@
 .timeline button {
   padding: 5px 10px;
   cursor: pointer;
+}
+
+.reactDatepickerWrapper {
+  width: auto;
+}
+
+.reactDatepickerInputContainer input {
+  width: 200px;
+  padding: 5px;
+  font-size: 14px;
+}
+
+.popup {
+  color: black;
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  background-color: white;
+  border: 1px solid black;
+  padding: 10px;
+  z-index: 100;
+  max-width: 300px;
+  max-height: 400px;
+  overflow-y: auto;
 }
