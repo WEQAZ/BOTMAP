@@ -3,23 +3,47 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 
 export default function ReservationModal({ isOpen, onClose, onSubmit, selectedRoom, currentTime }) {
-  const [startDate, setStartDate] = useState(currentTime);
-  const [endDate, setEndDate] = useState(new Date(currentTime.getTime() + 60 * 60 * 1000)); // Default to 1 hour later
+  const [selectedDate, setSelectedDate] = useState(currentTime);
+  const [selectedSlot, setSelectedSlot] = useState('');
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
 
   if (!isOpen) return null;
 
-  const handleSubmit = (e) => {
+  // Define available time slots
+  const timeSlots = [
+    '08:00 - 09:00',
+    '09:00 - 10:00',
+    '10:00 - 11:00',
+    '11:00 - 12:00',
+    '13:00 - 14:00',
+    '14:00 - 15:00',
+    '15:00 - 16:00',
+    '16:00 - 17:00',
+  ];
+
+  const handleSubmit = (e: any) => {
     e.preventDefault();
+
+    // Ensure both date and time slot are selected
+    if (!selectedDate || !selectedSlot) {
+      alert('Please select both a date and time slot.');
+      return;
+    }
+
+    // Get start and end times from the selected slot
+    const [startTime, endTime] = selectedSlot.split(' - ');
+
+    // Format the start and end datetime strings
     const reservationData = {
-      start_dt: startDate.toISOString(),
-      end_dt: endDate.toISOString(),
+      start_dt: `${selectedDate.toISOString().split('T')[0]}T${startTime}:00`,
+      end_dt: `${selectedDate.toISOString().split('T')[0]}T${endTime}:00`,
       title: title,
       location: selectedRoom,
       description: description,
-      subcalendar_ids: ["6820246"] // You might want to adjust this based on your Teamup setup
+      subcalendar_ids: ["6820246"] // Adjust based on your Teamup setup
     };
+
     onSubmit(reservationData);
   };
 
@@ -29,28 +53,25 @@ export default function ReservationModal({ isOpen, onClose, onSubmit, selectedRo
         <h2>Reserve {selectedRoom}</h2>
         <form onSubmit={handleSubmit}>
           <label>
-            Start Time:
+            Select Date:
             <DatePicker
-              selected={startDate}
-              onChange={date => setStartDate(date)}
-              showTimeSelect
-              timeFormat="HH:mm"
-              timeIntervals={15}
-              dateFormat="MMMM d, yyyy h:mm aa"
-              selectsRange={undefined}
+              selected={selectedDate}
+              onChange={date => setSelectedDate(date)}
+              dateFormat="MMMM d, yyyy"
+              minDate={new Date()} // Ensure only future dates are selectable
+              required
             />
           </label>
           <label>
-            End Time:
-            <DatePicker
-              selected={endDate}
-              onChange={date => setEndDate(date[0])}
-              showTimeSelect
-              timeFormat="HH:mm"
-              timeIntervals={15}
-              dateFormat="MMMM d, yyyy h:mm aa"
-              selectsRange={undefined}
-            />
+            Select Time Slot:
+            <select value={selectedSlot} onChange={e => setSelectedSlot(e.target.value)} required>
+              <option value="" disabled>Select a time slot</option>
+              {timeSlots.map((slot, index) => (
+                <option key={index} value={slot}>
+                  {slot}
+                </option>
+              ))}
+            </select>
           </label>
           <label>
             Title:
@@ -92,7 +113,7 @@ export default function ReservationModal({ isOpen, onClose, onSubmit, selectedRo
         label {
           margin-bottom: 10px;
         }
-        input, textarea {
+        select, input, textarea {
           width: 100%;
           padding: 5px;
         }
