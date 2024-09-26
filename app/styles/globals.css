@@ -105,3 +105,14 @@ a {
     color-scheme: dark;
   }
 }
+
+/* styles/globals.css */
+.react-datepicker-wrapper {
+  width: auto;
+}
+
+.react-datepicker__input-container input {
+  width: 200px;
+  padding: 5px;
+  font-size: 14px;
+}

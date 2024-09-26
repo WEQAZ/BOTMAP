@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import styles from '../components/ReservationModal.module.css';
 
 export default function ReservationModal({ isOpen, onClose, onSubmit, selectedRoom, currentTime }) {
   const [selectedDate, setSelectedDate] = useState(currentTime);
@@ -10,7 +11,6 @@ export default function ReservationModal({ isOpen, onClose, onSubmit, selectedRo
 
   if (!isOpen) return null;
 
-  // Define available time slots
   const timeSlots = [
     '08:00 - 09:00',
     '09:00 - 10:00',
@@ -25,46 +25,43 @@ export default function ReservationModal({ isOpen, onClose, onSubmit, selectedRo
   const handleSubmit = (e: any) => {
     e.preventDefault();
 
-    // Ensure both date and time slot are selected
     if (!selectedDate || !selectedSlot) {
       alert('Please select both a date and time slot.');
       return;
     }
 
-    // Get start and end times from the selected slot
     const [startTime, endTime] = selectedSlot.split(' - ');
 
-    // Format the start and end datetime strings
     const reservationData = {
       start_dt: `${selectedDate.toISOString().split('T')[0]}T${startTime}:00`,
       end_dt: `${selectedDate.toISOString().split('T')[0]}T${endTime}:00`,
       title: title,
       location: selectedRoom,
       description: description,
-      subcalendar_ids: ["6820246"] // Adjust based on your Teamup setup
+      subcalendar_ids: ["6820246"]
     };
 
     onSubmit(reservationData);
   };
 
   return (
-    <div className="modal">
-      <div className="modal-content">
+    <div className={styles.modal}>
+      <div className={styles.modalContent}>
         <h2>Reserve {selectedRoom}</h2>
-        <form onSubmit={handleSubmit}>
-          <label>
+        <form onSubmit={handleSubmit} className={styles.form}>
+          <label className={styles.label}>
             Select Date:
             <DatePicker
               selected={selectedDate}
               onChange={date => setSelectedDate(date)}
               dateFormat="MMMM d, yyyy"
-              minDate={new Date()} // Ensure only future dates are selectable
+              minDate={new Date()}
               required
             />
           </label>
-          <label>
+          <label className={styles.label}>
             Select Time Slot:
-            <select value={selectedSlot} onChange={e => setSelectedSlot(e.target.value)} required>
+            <select value={selectedSlot} onChange={e => setSelectedSlot(e.target.value)} required className={styles.select}>
               <option value="" disabled>Select a time slot</option>
               {timeSlots.map((slot, index) => (
                 <option key={index} value={slot}>
@@ -73,56 +70,20 @@ export default function ReservationModal({ isOpen, onClose, onSubmit, selectedRo
               ))}
             </select>
           </label>
-          <label>
+          <label className={styles.label}>
             Title:
-            <input type="text" value={title} onChange={e => setTitle(e.target.value)} required />
+            <input type="text" value={title} onChange={e => setTitle(e.target.value)} required className={styles.input} />
           </label>
-          <label>
+          <label className={styles.label}>
             Description:
-            <textarea value={description} onChange={e => setDescription(e.target.value)} />
+            <textarea value={description} onChange={e => setDescription(e.target.value)} className={styles.textarea} />
           </label>
-          <div className="button-group">
+          <div className={styles.buttonGroup}>
             <button type="submit">Reserve</button>
             <button type="button" onClick={onClose}>Cancel</button>
           </div>
         </form>
       </div>
-
-      <style jsx>{`
-        .modal {
-          position: fixed;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          background: rgba(0, 0, 0, 0.6);
-          display: flex;
-          justify-content: center;
-          align-items: center;
-        }
-        .modal-content {
-          background: white;
-          padding: 20px;
-          border-radius: 5px;
-          width: 300px;
-        }
-        form {
-          display: flex;
-          flex-direction: column;
-        }
-        label {
-          margin-bottom: 10px;
-        }
-        select, input, textarea {
-          width: 100%;
-          padding: 5px;
-        }
-        .button-group {
-          display: flex;
-          justify-content: space-between;
-          margin-top: 20px;
-        }
-      `}</style>
     </div>
   );
 }
