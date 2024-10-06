@@ -17,10 +17,12 @@ export default function Home() {
   const [showPopup, setShowPopup] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedRoom, setSelectedRoom] = useState(null);
+  const [confirmationMessage, setConfirmationMessage] = useState(""); // New state for confirmation message
+  const [showConfirmation, setShowConfirmation] = useState(false);
 
   useEffect(() => {
     const startDate = "2024-07-01";
-    const endDate = "2024-09-31";
+    const endDate = "2024-12-31";
   
     async function getEvents() {
       try {
@@ -85,7 +87,7 @@ export default function Home() {
       console.log("New event created:", newEvent);
       // Refresh events after creating a new one
       const startDate = "2024-07-01";
-      const endDate = "2024-09-31";
+      const endDate = "2024-012-31";
       const data = await fetchTeamupEvents(startDate, endDate);
       const filteredData = data.events.filter((event) =>
         event.location.startsWith("4")
@@ -93,12 +95,18 @@ export default function Home() {
       setEvents(filteredData);
       eventsRef.current = filteredData;
       updateObjectStatuses(filteredData, currentTimeRef.current);
+
+      // Close modal and show confirmation message
       setIsModalOpen(false);
+      setConfirmationMessage(`Room ${selectedRoom} has been successfully reserved!`);
+      setShowConfirmation(true); // Show confirmation
+      setTimeout(() => setShowConfirmation(false), 5000); // Hide after 5 seconds
     } catch (error) {
       console.error("Error creating event:", error);
       // Handle error (e.g., show error message to user)
     }
   }
+
 
   function filterEvents(targetName: any, time: Date) {
     return eventsRef.current.filter(
@@ -158,6 +166,9 @@ export default function Home() {
         selectedRoom={selectedRoom}
         currentTime={currentTime}
       />
+      {showConfirmation && (
+        <div className="confirmation-popup">{confirmationMessage}</div>
+      )}
       <div className="statuses">
         {Object.entries(objectStatuses).map(([object, events]) => (
           <div key={object} className="status">
@@ -264,6 +275,17 @@ export default function Home() {
           max-width: 300px;
           max-height: 400px;
           overflow-y: auto;
+        }
+        .confirmation-popup {
+          position: fixed;
+          top: 10%;
+          left: 50%;
+          transform: translateX(-50%);
+          background-color: #4caf50;
+          color: white;
+          padding: 10px;
+          border-radius: 5px;
+          z-index: 1000;
         }
       `}</style>
     </main>
