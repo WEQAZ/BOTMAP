@@ -56,7 +56,7 @@ export default function ReservationModal({ isOpen, onClose, onSubmit, selectedRo
             Select Date:
             <DatePicker
               selected={selectedDate}
-              onChange={date => setSelectedDate(date)}
+              onChange={(date: Date) => setSelectedDate(date)}
               dateFormat="MMMM d, yyyy"
               minDate={new Date()} // Ensure only future dates are selectable
               required
