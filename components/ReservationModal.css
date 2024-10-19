@@ -1,0 +1,136 @@
+
+.modal {
+    background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+  }
+  
+  .modal-dialog {
+    max-width: 600px;
+    margin: 30px auto;
+  }
+  
+  .modal-content {
+    border-radius: 2rem;
+    overflow: hidden;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  }
+  
+  .modal-header {
+    background-color: #f8f3ed;
+    color: #311e0c;
+    padding-left: 25px;
+    padding-top: 20px;
+  }
+  
+  .modal-title {
+    font-size: 1.5rem;
+  }
+  
+  .modal-header .close {
+    position: absolute;
+    right: 15px;
+    top: 7px;
+    color: #311e0c;
+    font-size: 2rem;
+    background: none; /* Remove background */
+    border: none; /* Remove border/frame */
+    cursor: pointer;
+    opacity: 0.8;
+    outline: none; /* Remove focus outline */
+    padding-right: 15px;
+  }
+  
+  .modal-header .close:hover {
+    color: #830d0d;
+  }
+  
+  /* Form styling */
+  .form-group {
+    margin-bottom: 15px;
+    color: #311e0c;
+  }
+  
+  .form-control {
+    border-radius: 1rem;
+    padding: 10px;
+    font-size: 1rem;
+    border: 1px solid #ced4da;
+    transition: border-color 0.2s ease-in-out;
+  }
+  
+  .form-control:focus {
+    border-color: #bc987b;
+    outline: 0;
+    box-shadow: 0 0 5px rgba(128, 189, 255, 0.5);
+  }
+
+  
+  
+  /* Button styling */
+  .button-group .btn {
+    padding: 10px 20px;
+    font-size: 1rem;
+    border-radius: 5px;
+    
+  }
+  
+  .button-group .btn-secondary {
+    background-color: #9a9a9a;
+    border: none;
+    border-radius: 2rem;
+    color: #ffffff;
+  }
+  
+  .button-group .btn-secondary:hover {
+    background-color: #5a6268;
+    border-radius: 2rem;
+  }
+  
+  .button-group .btn-reserve-primary {
+    background-color: #5fbb73;
+    border: none;
+    border-radius: 2rem;
+    color: #ffffff;
+  }
+  
+  .button-group .btn-reserve-primary:hover {
+    background-color: #358a47;
+    border-radius: 2rem;
+  }
+  
+  /* Label styling */
+  label {
+    font-weight: bold;
+    margin-bottom: 5px;
+    display: block;
+  }
+  
+  /* Input fields */
+  input[type="text"], textarea {
+    font-family: 'Arial', sans-serif;
+  }
+  
+  /* DatePicker custom styling */
+  .react-datepicker-wrapper {
+    display: block;
+  }
+  
+  .react-datepicker__input-container input {
+    width: 100%;
+    padding: 10px;
+  }
+  
+  .react-datepicker__day--selected, 
+  .react-datepicker__day--keyboard-selected {
+    color: white;
+  }
+  
+  /* Modal body padding */
+  .modal-body {
+    padding: 20px;
+  }
+  
+  /* Title and description */
+  textarea {
+    resize: vertical;
+  }
+  

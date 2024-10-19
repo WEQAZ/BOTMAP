@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import 'bootstrap/dist/css/bootstrap.min.css';
+import './ReservationModal.css';
 
 export default function ReservationModal({ isOpen, onClose, onSubmit, selectedRoom, currentTime }) {
   const [selectedDate, setSelectedDate] = useState(currentTime);
@@ -22,7 +24,7 @@ export default function ReservationModal({ isOpen, onClose, onSubmit, selectedRo
     '16:00 - 17:00',
   ];
 
-  const handleSubmit = (e: any) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
 
     // Ensure both date and time slot are selected
@@ -48,81 +50,68 @@ export default function ReservationModal({ isOpen, onClose, onSubmit, selectedRo
   };
 
   return (
-    <div className="modal">
-      <div className="modal-content">
-        <h2>Reserve {selectedRoom}</h2>
-        <form onSubmit={handleSubmit}>
-          <label>
-            Select Date:
-            <DatePicker
-              selected={selectedDate}
-              onChange={(date: Date) => setSelectedDate(date)}
-              dateFormat="MMMM d, yyyy"
-              minDate={new Date()} // Ensure only future dates are selectable
-              required
-            />
-          </label>
-          <label>
-            Select Time Slot:
-            <select value={selectedSlot} onChange={e => setSelectedSlot(e.target.value)} required>
-              <option value="" disabled>Select a time slot</option>
-              {timeSlots.map((slot, index) => (
-                <option key={index} value={slot}>
-                  {slot}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label>
-            Title:
-            <input type="text" value={title} onChange={e => setTitle(e.target.value)} required />
-          </label>
-          <label>
-            Description:
-            <textarea value={description} onChange={e => setDescription(e.target.value)} />
-          </label>
-          <div className="button-group">
-            <button type="submit">Reserve</button>
-            <button type="button" onClick={onClose}>Cancel</button>
+    <div className="modal show" style={{ display: 'block' }}>
+      <div className="modal-dialog modal-dialog-centered">
+        <div className="modal-content">
+          <div className="modal-header">
+            <h5 className="modal-title">Room {selectedRoom} Reservation</h5>
+            <button type="button" className="close" onClick={onClose} aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
           </div>
-        </form>
-      </div>
+          <div className="modal-body">
+            <form onSubmit={handleSubmit}>
+              <div className="form-group">
+                <label>Select Date:</label>
+                <DatePicker
+                  selected={selectedDate}
+                  onChange={(date: Date | null) => setSelectedDate(date)}
+                  dateFormat="MMMM d, yyyy"
+                  minDate={new Date()} // Ensure only future dates are selectable
+                  className="form-control"
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label>Select Time Slot: </label>
+                <select value={selectedSlot} onChange={e => setSelectedSlot(e.target.value)} className="form-control" required>
+                  <option value="" disabled>Select a time slot</option>
+                  {timeSlots.map((slot, index) => (
+                    <option key={index} value={slot}>
+                      {slot}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="form-group">
+                <label>Title:</label>
+                <input
+                  type="text"
+                  value={title}
+                  onChange={e => setTitle(e.target.value)}
+                  className="form-control"
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label>Description:</label>
+                <textarea
+                  value={description}
+                  onChange={e => setDescription(e.target.value)}
+                  className="form-control"
+                  rows={3} // Use number instead of string
+                />
+              </div>
+              <div className="button-group d-flex justify-content-between">
+              
+                <button type="button" className="btn btn-secondary" onClick={onClose}>Cancel</button>
+                <button type="submit" className="btn btn-reserve-primary">Reserve</button>
 
-      <style jsx>{`
-        .modal {
-          position: fixed;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          background: rgba(0, 0, 0, 0.6);
-          display: flex;
-          justify-content: center;
-          align-items: center;
-        }
-        .modal-content {
-          background: white;
-          padding: 20px;
-          border-radius: 5px;
-          width: 300px;
-        }
-        form {
-          display: flex;
-          flex-direction: column;
-        }
-        label {
-          margin-bottom: 10px;
-        }
-        select, input, textarea {
-          width: 100%;
-          padding: 5px;
-        }
-        .button-group {
-          display: flex;
-          justify-content: space-between;
-          margin-top: 20px;
-        }
-      `}</style>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
