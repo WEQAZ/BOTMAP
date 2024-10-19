@@ -9,44 +9,50 @@ export default function ReservationModal({ isOpen, onClose, onSubmit, selectedRo
   const [selectedSlot, setSelectedSlot] = useState('');
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
+  const [nameInfo, setNameInfo] = useState('');
+  const [contactInfo, setContactInfo] = useState('');
 
   if (!isOpen) return null;
 
-  // Define available time slots
   const timeSlots = [
-    '08:00 - 09:00',
-    '09:00 - 10:00',
-    '10:00 - 11:00',
-    '11:00 - 12:00',
-    '13:00 - 14:00',
-    '14:00 - 15:00',
-    '15:00 - 16:00',
-    '16:00 - 17:00',
+    '08:00 - 09:30',
+    '09:30 - 11:00',
+    '11:00 - 12:30',
+    '12:30 - 13:00',
+    '13:00 - 14:30',
+    '14:30 - 16:00',
+    '16:00 - 17:30',
+    '17:30 - 19:00',
   ];
 
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    // Ensure both date and time slot are selected
     if (!selectedDate || !selectedSlot) {
       alert('Please select both a date and time slot.');
       return;
     }
 
-    // Get start and end times from the selected slot
     const [startTime, endTime] = selectedSlot.split(' - ');
 
-    // Format the start and end datetime strings
     const reservationData = {
       start_dt: `${selectedDate.toISOString().split('T')[0]}T${startTime}:00`,
       end_dt: `${selectedDate.toISOString().split('T')[0]}T${endTime}:00`,
       title: title,
       location: selectedRoom,
-      description: description,
-      subcalendar_ids: ["6820246"] // Adjust based on your Teamup setup
+      who : nameInfo + " Tel:" + contactInfo,
+      notes: description,
+      subcalendar_ids: ["6820246"]
     };
 
-    onSubmit(reservationData);
+    onSubmit(reservationData).then(() => {
+      setSelectedDate(currentTime);
+      setSelectedSlot('');
+      setTitle('');
+      setDescription('');
+      setNameInfo('');
+      setContactInfo('');
+    });
   };
 
   return (
@@ -61,27 +67,33 @@ export default function ReservationModal({ isOpen, onClose, onSubmit, selectedRo
           </div>
           <div className="modal-body">
             <form onSubmit={handleSubmit}>
-              <div className="form-group">
-                <label>Select Date:</label>
-                <DatePicker
-                  selected={selectedDate}
-                  onChange={(date: Date | null) => setSelectedDate(date)}
-                  dateFormat="MMMM d, yyyy"
-                  minDate={new Date()} // Ensure only future dates are selectable
-                  className="form-control"
-                  required
-                />
-              </div>
-              <div className="form-group">
-                <label>Select Time Slot: </label>
-                <select value={selectedSlot} onChange={e => setSelectedSlot(e.target.value)} className="form-control" required>
-                  <option value="" disabled>Select a time slot</option>
-                  {timeSlots.map((slot, index) => (
-                    <option key={index} value={slot}>
-                      {slot}
-                    </option>
-                  ))}
-                </select>
+              <div className="row">
+                <div className="col">
+                  <div className="form-group">
+                    <label>Date:</label>
+                    <DatePicker
+                      selected={selectedDate}
+                      onChange={(date: Date | null) => setSelectedDate(date)}
+                      dateFormat="MMMM d, yyyy"
+                      minDate={new Date()}
+                      className="form-control"
+                      required
+                    />
+                  </div>
+                </div>
+                <div className="col">
+                  <div className="form-group">
+                    <label>Time Slot:</label>
+                    <select value={selectedSlot} onChange={e => setSelectedSlot(e.target.value)} className="form-control" required>
+                      <option value="" disabled>Select a time slot</option>
+                      {timeSlots.map((slot, index) => (
+                        <option key={index} value={slot}>
+                          {slot}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
               </div>
               <div className="form-group">
                 <label>Title:</label>
@@ -99,14 +111,32 @@ export default function ReservationModal({ isOpen, onClose, onSubmit, selectedRo
                   value={description}
                   onChange={e => setDescription(e.target.value)}
                   className="form-control"
-                  rows={3} // Use number instead of string
+                  rows={3}
+                />
+              </div>
+              <div className="form-group">
+                <label>Reservation Name:</label>
+                <input
+                  type="text"
+                  value={nameInfo}
+                  onChange={e => setNameInfo(e.target.value)}
+                  className="form-control"
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label>Phone Number:</label>
+                <input
+                  type="tel"
+                  value={contactInfo}
+                  onChange={e => setContactInfo(e.target.value)}
+                  className="form-control"
+                  required
                 />
               </div>
               <div className="button-group d-flex justify-content-between">
-              
                 <button type="button" className="btn btn-secondary" onClick={onClose}>Cancel</button>
                 <button type="submit" className="btn btn-reserve-primary">Reserve</button>
-
               </div>
             </form>
           </div>

@@ -88,9 +88,10 @@ export default function Home() {
     try {
       const newEvent = await createTeamupEvent(reservationData);
       console.log("New event created:", newEvent);
+  
       // Refresh events after creating a new one
       const startDate = "2024-07-01";
-      const endDate = "2024-012-31";
+      const endDate = "2024-12-31"; // Corrected typo in the end date
       const data = await fetchTeamupEvents(startDate, endDate);
       const filteredData = data.events.filter((event) =>
         event.location.startsWith("4")
@@ -98,17 +99,26 @@ export default function Home() {
       setEvents(filteredData);
       eventsRef.current = filteredData;
       updateObjectStatuses(filteredData, currentTimeRef.current);
-
+  
       // Close modal and show confirmation message
       setIsModalOpen(false);
-      setConfirmationMessage(`Room ${selectedRoom} has been successfully reserved!`);
-      setShowConfirmation(true); // Show confirmation
-      setTimeout(() => setShowConfirmation(false), 5000); // Hide after 5 seconds
+  
+      // Show alert confirmation
+      window.alert(`Room ${selectedRoom} has been successfully reserved!`);
+  
+      // // Set confirmation message for additional UI feedback (optional)
+      // setConfirmationMessage(`Room ${selectedRoom} has been successfully reserved!`);
+      // setShowConfirmation(true); // Show confirmation popup
+      // setTimeout(() => setShowConfirmation(false), 5000); // Hide after 5 seconds
     } catch (error) {
       console.error("Error creating event:", error);
-      // Handle error (e.g., show error message to user)
+      // Show error message in the modal instead of closing it
+      setPopupMessage("Failed to reserve the room. Please try again.");
+      setShowPopup(true); // Show error popup
+      setTimeout(() => setShowPopup(false), 5000); // Hide after 5 seconds
     }
   }
+  
 
 
   function filterEvents(targetName: any, time: Date) {
@@ -148,7 +158,8 @@ export default function Home() {
       return newTime;
     });
   }
-
+  
+  
 
   return (
     <main className="container-fluid main-container">
@@ -195,14 +206,41 @@ export default function Home() {
                 )}
                 <ReservationModal
                   isOpen={isModalOpen}
-                  onClose={() => setIsModalOpen(true)}
+                  onClose={() => setIsModalOpen(false)}
                   onSubmit={handleReservationSubmit}
                   selectedRoom={selectedRoom}
                   currentTime={currentTime}
                 />
+                
                 {showConfirmation && (
-                  <div className="confirmation-popup">{confirmationMessage}</div>
-                )}
+                <div className="modal show" tabIndex={-1}style={{ display: "block" }}>
+                  <div className="modal-dialog">
+                    <div className="modal-content">
+                      <div className="modal-header">
+                        <h5 className="modal-title">Reservation Confirmed</h5>
+                        <button
+                          type="button"
+                          className="btn-close"
+                          onClick={() => setShowConfirmation(false)}
+                        ></button>
+                      </div>
+                      <div className="modal-body">
+                        <p>Room {selectedRoom} has been successfully reserved!</p>
+                      </div>
+                      <div className="modal-footer">
+                        <button
+                          type="button"
+                          className="btn btn-primary"
+                          onClick={() => setShowConfirmation(false)}
+                        >
+                          OK
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+          
               </div>
             </div>
           </div>
@@ -242,12 +280,7 @@ export default function Home() {
               ))}
             </div>
           </div>
-
-
-
-
         </div>
-
 
         <footer className="footer text-center mt-4">
           <p className="mb-0">© {new Date().getFullYear()} Project EKKO. All rights reserved.</p>
