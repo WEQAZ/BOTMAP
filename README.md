@@ -2,6 +2,9 @@ This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next
 
 ## Getting Started
 
+npm install react react-datepicker react-icons @splinetool/react-spline @splinetool/runtime
+npm i bootstrap@5.3.3
+
 First, run the development server:
 
 ```bash
