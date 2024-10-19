@@ -195,7 +195,7 @@ export default function Home() {
                 <Suspense fallback={<div>Loading...</div>}>
                   <Spline
                     scene="https://prod.spline.design/GVOmVf1B30xEIUWb/scene.splinecode"
-                    onMouseDown={onSplineMouseDown}
+                    onSplineMouseDown={onSplineMouseDown}
                   />
                 </Suspense>
                 {showPopup && (
