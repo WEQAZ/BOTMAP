@@ -29,12 +29,16 @@ export default function Home() {
   const [splineApp, setSplineApp] = useState(null);
 
   useEffect(() => {
-    const startDate = "2024-07-01";
-    const endDate = "2024-12-31";
-
     if (splineApp) {
+      console.log("🚀 ~ useEffect ~ splineApp:", splineApp)
       updateRoomColors(splineApp, objectStatuses);
     }
+  }, [objectStatuses, splineApp]);
+
+  
+  useEffect(() => {
+    const startDate = "2024-07-01";
+    const endDate = "2024-12-31";
 
     async function getEvents() {
       try {
@@ -82,13 +86,19 @@ export default function Home() {
   }
 
   function updateRoomColors(spline, statuses) {
-    if (!spline) return;
+    console.log("🚀 ~ updateRoomColors ~ spline:", spline)
+    
+    if (!spline) {
+      return;
+    }
 
     // Get all room objects that start with "4"
     const roomObjects = Object.keys(statuses).filter(room => room.startsWith('4'));
-
+    console.log("🚀 ~ updateRoomColors ~ roomObjects:", roomObjects)
+    
     roomObjects.forEach(roomNumber => {
       const isOccupied = Array.isArray(statuses[roomNumber]) && statuses[roomNumber].length > 0;
+      console.log("🚀 ~ updateRoomColors ~ isOccupied:", isOccupied)
 
       try {
         // Get the room object from Spline
@@ -98,8 +108,8 @@ export default function Home() {
           // Set the variables for this specific room
           // When occupied: white = 100, green = 0
           // When available: white = 0, green = 100
-          spline.setVariable(`${roomNumber}_red`, isOccupied ? 100 : 0);
-          spline.setVariable(`${roomNumber}_green`, isOccupied ? 0 : 100);
+          spline.setVariable(`room${roomNumber}_unavailable`, isOccupied ? 89 : 0);
+          spline.setVariable(`room${roomNumber}_available`, isOccupied ? 0 : 89);
         }
       } catch (error) {
         console.warn(`Could not update colors for room ${roomNumber}:`, error);
@@ -107,13 +117,14 @@ export default function Home() {
       }
     });
   }
+  
 
   function onSplineLoad(spline) {
     setSplineApp(spline);
 
     // Log available variables
     console.log('🚀 ~ Available Spline variables:', spline.getVariables());
-
+    // console.log("🚀 ~ onSplineLoad ~ Object:", Object.entries(objectStatuses).map(([object, events]))
     // Initial color update when the scene loads
     if (Object.keys(objectStatuses).length > 0) {
       console.log("🚀 ~ onSplineLoad ~ objectStatuses:", objectStatuses)
@@ -234,6 +245,7 @@ export default function Home() {
     });
   }
 
+  
   return (
     <main className="container-fluid main-container">
       <div className="container mx-auto px-6 py-8">
@@ -275,7 +287,7 @@ export default function Home() {
                 <div className="spline-container">
                   <Suspense fallback={<div>Loading...</div>}>
                     <Spline
-                      scene="https://prod.spline.design/2eXdL3ZEnnS9UnIM/scene.splinecode"
+                      scene="https://prod.spline.design/ug6H35mgX6bVfOkp/scene.splinecode"
                       onSplineMouseDown={onSplineMouseDown}
                       onLoad={onSplineLoad}
                     />
