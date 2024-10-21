@@ -1,3 +1,4 @@
+// page.tsx
 "use client";
 import { useRef, useState, useEffect, Suspense } from "react";
 import Spline from "@splinetool/react-spline";
