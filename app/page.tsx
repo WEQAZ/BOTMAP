@@ -14,6 +14,7 @@ import "./page.css";
 export default function Home() {
   const [events, setEvents] = useState([]);
   const eventsRef = useRef<any>([]);
+  const [currentDate, setCurrentDate] = useState(new Date());
   const [currentTime, setCurrentTime] = useState(new Date());
   const currentTimeRef = useRef(new Date());
   const [objectStatuses, setObjectStatuses] = useState({});
@@ -24,10 +25,15 @@ export default function Home() {
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [ShowFailure, setShowFailure] = useState(false);
+  const [splineApp, setSplineApp] = useState(null);
 
   useEffect(() => {
     const startDate = "2024-07-01";
     const endDate = "2024-12-31";
+
+    if (splineApp) {
+      updateRoomColors(splineApp, objectStatuses);
+    }
 
     async function getEvents() {
       try {
@@ -74,9 +80,52 @@ export default function Home() {
     setObjectStatuses(statuses);
   }
 
+  function updateRoomColors(spline, statuses) {
+    if (!spline) return;
+
+    // Get all room objects that start with "4"
+    const roomObjects = Object.keys(statuses).filter(room => room.startsWith('4'));
+
+    roomObjects.forEach(roomNumber => {
+      const isOccupied = Array.isArray(statuses[roomNumber]) && statuses[roomNumber].length > 0;
+
+      try {
+        // Get the room object from Spline
+        const roomObject = spline.findObjectByName(roomNumber);
+
+        if (roomObject) {
+          // Set the variables for this specific room
+          // When occupied: white = 100, green = 0
+          // When available: white = 0, green = 100
+          spline.setVariable(`${roomNumber}_red`, isOccupied ? 100 : 0);
+          spline.setVariable(`${roomNumber}_green`, isOccupied ? 0 : 100);
+        }
+      } catch (error) {
+        console.warn(`Could not update colors for room ${roomNumber}:`, error);
+
+      }
+    });
+  }
+
+  function onSplineLoad(spline) {
+    setSplineApp(spline);
+
+    // Log available variables
+    console.log('🚀 ~ Available Spline variables:', spline.getVariables());
+
+    // Initial color update when the scene loads
+    if (Object.keys(objectStatuses).length > 0) {
+      console.log("🚀 ~ onSplineLoad ~ objectStatuses:", objectStatuses)
+      updateRoomColors(spline, objectStatuses);
+    } else {
+      console.warn(`Could not update colors for room `);
+    }
+  }
+
   function onSplineMouseDown(event: any) {
     const targetName = event.target?.name;
     console.log("Mouse down event:", event);
+
 
     if (targetName && targetName.startsWith("4")) {
       setSelectedRoom(targetName);
@@ -144,12 +193,32 @@ export default function Home() {
     );
   }
 
+  // function handleDateChange(date) {
+  //   if (date) {
+  //     setCurrentTime(date);
+  //     currentTimeRef.current = date;
+  //     console.log(`Time updated to: ${date}`);
+  //     updateObjectStatuses(eventsRef.current, date);
+  //   }
+  // }
+  function updateCurrentTime(time) {
+    setCurrentTime(time);
+    currentTimeRef.current = time;
+    updateObjectStatuses(eventsRef.current, time);
+}
+
   function handleDateChange(date) {
     if (date) {
-      setCurrentTime(date);
-      currentTimeRef.current = date;
-      console.log(`Time updated to: ${date}`);
-      updateObjectStatuses(eventsRef.current, date);
+      setCurrentDate(date);
+      updateCurrentTime(currentTime);
+    }
+  }
+
+  function handleTimeChange(time) {
+    if (time) {
+      setCurrentTime(new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate(), time.getHours(), time.getMinutes()));
+      currentTimeRef.current = time;
+      updateObjectStatuses(eventsRef.current, time);
     }
   }
 
@@ -163,136 +232,146 @@ export default function Home() {
       return newTime;
     });
   }
- 
+
   return (
     <main className="container-fluid main-container">
       <div className="container mx-auto px-6 py-8">
         <h1 className="botmaps-heading">BOTMAPS</h1>
-        <div className="row">
-          {/* Timeline Controls */}
-          <div className="col-lg-8">
-            {/* New container for DatePicker and Spline */}
-            <div className="bordered-container">
-              <div className="datepicker-container d-flex justify-content-center align-items-center my-3">
-                <button className="btn btn-primary me-2" onClick={() => moveTime(-1)}>
-                  ◀ 1 Hour
-                </button>
+        <div className="row ">
+          <div className="flex-container ">
+            {/* Timeline Controls */}
+            <div className="col-lg-8">
+              {/* New container for DatePicker and Splineflex-container */}
 
-                <DatePicker
-                  selected={currentTime}
-                  onChange={handleDateChange}
-                  minDate={new Date()}
-                  showTimeSelect
-                  timeFormat="HH:mm"
-                  timeIntervals={60}
-                  dateFormat="MMMM d, yyyy h:mm aa"
-                  className="form-control text-center custom-datepicker full-width-datepicke"
-                />
-                <button className="btn btn-primary ms-2" onClick={() => moveTime(1)}>
-                  1 Hour ▶
-                </button>
-              </div>
-
-              {/* 3D Map */}
-              <div className="spline-container">
-                <Suspense fallback={<div>Loading...</div>}>
-                  <Spline
-                    scene="https://prod.spline.design/GVOmVf1B30xEIUWb/scene.splinecode"
-                    onSplineMouseDown={onSplineMouseDown}
+              <div className="bordered-container">
+                <div className="datepicker-container d-flex justify-content-center align-items-center my-3">
+                
+                  <DatePicker
+                    selected={currentDate}
+                    onChange={handleDateChange}
+                    minDate={new Date()}
+                    dateFormat="MMMM d, yyyy"
+                    className="form-control text-center custom-datepicker full-width-datepicker"
                   />
-                </Suspense>
-                {showPopup && (
-                  <div
-                    className="popup"
-                    dangerouslySetInnerHTML={{ __html: popupMessage }}
-                  ></div>
-                )}
-                <ReservationModal
-                  isOpen={isModalOpen}
-                  onClose={() => setIsModalOpen(false)}
-                  onSubmit={handleReservationSubmit}
-                  selectedRoom={selectedRoom}
-                  currentTime={currentTime}
-                />
+                  
+                  <button className="btn btn-primary ms-2" onClick={() => moveTime(-1)}>◀</button>
 
-                {showConfirmation && (
-                  <div className="modal show" tabIndex={-1} style={{ display: "block" }}>
-                    <div className="modal-dialog">
-                      <div className="modal-content">
-                        <div className="modal-header">
-                          <h5 className="modal-title">Reservation Confirmed</h5>
-                          <button
-                            type="button"
-                            className="btn-close"
-                            onClick={() => setShowConfirmation(false)}
-                          ></button>
-                        </div>
-                        <div className="modal-body">
-                          <p>Room {selectedRoom} has been successfully reserved!</p>
-                        </div>
-                        <div className="modal-footer">
-                          <button
-                            type="button"
-                            className="btn btn-primary"
-                            onClick={() => setShowConfirmation(false)}
-                          >
-                            OK
-                          </button>
+                  <DatePicker
+                    selected={currentTime}
+                    onChange={handleTimeChange}
+                    showTimeSelect
+                    showTimeSelectOnly
+                    timeIntervals={60}
+                    dateFormat="h:mm aa"
+
+                    className="form-control text-center custom-datepicker full-width-datepicker ms-2"
+                  />
+                  
+                  <button className="btn btn-primary ms-2" onClick={() => moveTime(1)}>▶</button>
+                </div>
+
+                {/* 3D Map */}
+                <div className="spline-container">
+                  <Suspense fallback={<div>Loading...</div>}>
+                    <Spline
+                      scene="https://prod.spline.design/2eXdL3ZEnnS9UnIM/scene.splinecode"
+                      onSplineMouseDown={onSplineMouseDown}
+                      onLoad={onSplineLoad}
+                    />
+                  </Suspense>
+                  {showPopup && (
+                    <div
+                      className="popup"
+                      dangerouslySetInnerHTML={{ __html: popupMessage }}
+                    ></div>
+                  )}
+                  <ReservationModal
+                    isOpen={isModalOpen}
+                    onClose={() => setIsModalOpen(false)}
+                    onSubmit={handleReservationSubmit}
+                    selectedRoom={selectedRoom}
+                    currentTime={currentTime}
+                  />
+
+                  {showConfirmation && (
+                    <div className="modal show" tabIndex={-1} style={{ display: "block" }}>
+                      <div className="modal-dialog">
+                        <div className="modal-content">
+                          <div className="modal-header">
+                            <h5 className="modal-title">Reservation Confirmed</h5>
+                            <button
+                              type="button"
+                              className="btn-close"
+                              onClick={() => setShowConfirmation(false)}
+                            ></button>
+                          </div>
+                          <div className="modal-body">
+                            <p>Room {selectedRoom} has been successfully reserved!</p>
+                          </div>
+                          <div className="modal-footer">
+                            <button
+                              type="button"
+                              className="btn btn-primary"
+                              onClick={() => setShowConfirmation(false)}
+                            >
+                              OK
+                            </button>
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                )}
+                  )}
 
+                </div>
               </div>
             </div>
-          </div>
-          <div className="col-lg-4">
-            <div className="room-status-list">
-              {Object.entries(objectStatuses).map(([object, events]) => (
-                <div key={object} className="room-status-card">
-                  <div className="d-flex align-items-center mb-2">
-                    <span
-                      className={`status-dot ${(events as any[]).length > 0 ? "bg-danger" : "bg-success"
-                        }`}
-                    ></span>
-                    <h5 className="m-0">{object}</h5>
-                  </div>
+            <div className="col-lg-4">
+              <div className="room-status-list">
+                {Object.entries(objectStatuses).map(([object, events]) => (
+                  <div key={object} className="room-status-card">
+                    <div className="d-flex align-items-center mb-2">
+                      <span
+                        className={`status-dot ${(events as any[]).length > 0 ? "custom-bg-danger" : "custom-bg-success"
+                          }`}
+                      ></span>
+                      <h5 className="m-0">{object}</h5>
+                    </div>
 
-                  <div className="room-event-info">
-                    {Array.isArray(events) && events.length > 0 ? (
-                      <div
-                        dangerouslySetInnerHTML={{ __html: createPopupContent(events) }}
-                      ></div>
-                    ) : (
-                      <p className="m-0 text-muted">No events</p>
-                    )}
+                    <div className="room-event-info">
+                      {Array.isArray(events) && events.length > 0 ? (
+                        <div
+                          dangerouslySetInnerHTML={{ __html: createPopupContent(events) }}
+                        ></div>
+                      ) : (
+                        <p className="m-0 text-muted">No events</p>
+                      )}
+                    </div>
+                    <div className="d-flex justify-content-end mt-2">
+                      {(events as any[]).length === 0 && (
+                        <button
+                          className="btn btn-outline-secondary btn-sm"
+                          onClick={() => {
+                            setSelectedRoom(object);
+                            setIsModalOpen(true);
+                          }}
+                        >
+                          <FaPlus />
+                        </button>
+                      )}
+                      {showSuccess && (
+                        <div className="alert alert-success" role="alert">
+                          <strong>Success!</strong> Room has been successfully reserved!
+                        </div>
+                      )}
+                      {ShowFailure && (
+                        <div className="alert alert-danger" role="alert">
+                          <strong>Failed!</strong> Please try again or contact our staff!
+                        </div>
+                      )}
+                    </div>
                   </div>
-                  <div className="d-flex justify-content-end mt-2">
-                    {(events as any[]).length === 0 && (
-                      <button
-                        className="btn btn-outline-secondary btn-sm"
-                        onClick={() => {
-                          setSelectedRoom(object);
-                          setIsModalOpen(true);
-                        }}
-                      >
-                        <FaPlus />
-                      </button>
-                    )}
-                    {showSuccess && (
-                      <div className="alert alert-success" role="alert">
-                        <strong>Success!</strong> Room has been successfully reserved!
-                      </div>
-                    )}
-                    {ShowFailure && (
-                      <div className="alert alert-danger" role="alert">
-                        <strong>Failed!</strong> Please try again or contact our staff!
-                      </div>
-                    )}
-                  </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           </div>
         </div>
@@ -312,7 +391,7 @@ export default function Home() {
         const contactInfo = event.who ? event.who.split('Tel:') : ["", ""];
         let contactName = contactInfo[0].trim(); // Name part
         const contactPhone = contactInfo[1] ? contactInfo[1].trim() : ""; // Phone number part, if available
-  
+
         // Function to capitalize the first letter of the name
         const capitalizeFirstLetter = (name) => {
           return name.charAt(0).toUpperCase() + name.slice(1);
@@ -320,8 +399,8 @@ export default function Home() {
 
         // Capitalize the first letter of the contact name
         contactName = capitalizeFirstLetter(contactName);
-  
-  
+
+
         // Format the date and time
         const startDate = new Date(event.start_dt).toLocaleDateString();
         const startTime = new Date(event.start_dt).toLocaleTimeString([], {
@@ -332,10 +411,10 @@ export default function Home() {
           hour: '2-digit',
           minute: '2-digit',
         });
-  
+
         // Only display phone number if it's available
         const contactDetails = contactPhone ? `Contact: K. ${contactName} (Tel: ${contactPhone})` : `Contact: Prof. ${contactName}`;
-  
+
         return `
           <div key=${event.id}>
             <h3>${event.title}</h3>
@@ -347,5 +426,5 @@ export default function Home() {
       })
       .join("");
   }
-  
+
 }

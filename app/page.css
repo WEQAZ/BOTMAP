@@ -1,85 +1,80 @@
 .botmaps-heading {
+    font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     font-size: 3rem;
-    /* Increase font size */
     font-weight: bold;
-    /* Make the text bold */
     color: #311e0c;
     text-align: left;
-    /* Center the heading */
     padding-top: 2rem;
     padding-left: 1rem;
     margin-bottom: 1rem;
-    /* Space below the heading */
     text-transform: uppercase;
-    /* Uppercase letters for emphasis */
     letter-spacing: 0.1em;
-    /* Slight spacing between letters */
 }
 
 /* Set the background color for the entire page */
 body {
     background-color: #ffffff;
-    /* Change this to your desired color */
     margin: 0;
-    /* Remove default margin */
     height: 100vh;
-    /* Ensure it covers the full viewport height */
 }
 
 /* Set the background color for the main container */
 .main-container {
     background-color: #ede5dc;
-    /* Change this to your desired color */
     min-height: 100vh;
-    /* Ensure it covers the full viewport height */
+    padding: 0.5rem 4rem 0rem 2rem;
+}
+
+/* Flex container to align bordered-container and room-status-list */
+.flex-container {
+    display: flex;
+    justify-content: space-between;
+    gap: 2rem;
+}
+
+/* Make bordered-container and room-status-list the same height */
+.bordered-container,
+.room-status-list {
+    flex: 1;
+    min-height: 500px;
+    height: auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
 }
 
 /* Container for DatePicker and Spline with border */
 .bordered-container {
-    /* border: 1px solid #dee2e6; Border color */
     border-radius: 2rem;
-    /* Rounded corners */
-    padding: 1.5rem;
-    /* Padding inside the container */
+    padding: 1rem 2rem 2rem 2rem;
     background-color: #ffffff;
-    /* Optional background color */
-    max-height: fit-content;
 }
 
 /* Specific styling for Spline container */
 .datepicker-container {
     background-color: #f8f3ed;
     border-radius: 2rem;
-    padding: 0.75rem;
-
+    padding: 1rem;
+    
 }
 
 .full-width-datepicker {
-    width: 100%; /* Make the DatePicker full width */
-  }
+    width:min-content;
+}
 
 .custom-datepicker {
     border-radius: 2rem;
-    /* Rounded corners */
     padding: 0.5rem;
-    /* Padding */
     background-color: #ffffff;
-    /* Background color */
-    transition: border-color 0.3s, box-shadow 0.3s;
-    /* Transition effects */
-    width: 100%;
-    /* Set max width for the input */
     border-color: #ffffff;
     
 }
 
-/* Focus state for DatePicker */
 .custom-datepicker:focus {
     outline: none;
-    /* Remove default outline */
     box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
-    /* Shadow effect */
     border-radius: 2rem;
+
 }
 
 .react-datepicker-time__header {
@@ -87,96 +82,70 @@ body {
     padding-top: 12px;
 }
 
-/* Custom styling for the dropdown calendar */
 .react-datepicker {
     border: 1px solid #f8f3ed;
-    /* Border for the calendar */
     border-radius: 0.25rem;
-    /* Rounded corners */
-    width: 100%;
-
+    width:min-content;
 }
 
 .react-datepicker__navigation-icon::before {
     border-color: #311e0c;
-    /* Change the arrow color to red */
 }
 
 .react-datepicker__navigation:hover .react-datepicker__navigation-icon::before {
     border-color: #695d4f;
-    /* Change the color to DodgerBlue on hover */
 }
 
-/* Style for the day buttons */
 .react-datepicker__day {
     border-radius: 0.25rem;
-    /* Rounded corners */
 }
 
-
-/* Hover state for day buttons */
 .react-datepicker__day:hover {
     background-color: #e3e3e3;
-    /* Background color on hover */
     color: white;
-    /* Text color on hover */
 }
 
-/* Selected day styling */
 .react-datepicker__day--selected {
-    background-color:#bad9f1;
-    /* Background color for selected day */
-    color:#311e0c;
-    /* Text color for selected day */
+    background-color: #bad9f1;
+    color: #311e0c;
 }
 
-/* Style for the header */
 .react-datepicker__header {
     background-color: #ecdfd1;
-    /* Header background */
     color: white;
-    /* Header text color */
     border: none;
-    /* Remove border */
 }
 
+.custom-bg-success{
+    background-color: #25A925;
+}
 
+.custom-bg-danger{
+    background-color: #fc0000;
+}
 
-/* Button styling for btn-outline-primary */
+/* Button styling */
 .btn-outline-primary {
     color: #000000;
-    /* Text color */
     border-color: #ffffff;
-    /* Border color */
     background-color: transparent;
-    /* Background color */
     transition: background-color 0.3s, color 0.3s;
-    /* Transition for hover effects */
 }
 
-/* Button hover state */
 .btn-outline-primary:hover {
     background-color: #6c757d;
-    /* Background color on hover */
     border-color: #ffffff;
     color: white;
-    /* Text color on hover */
 }
 
-/* Button active state */
 .btn-outline-primary:active {
     background-color: #dee2e6;
-    /* Darker background on active */
-    /* border-color: #ced4da; Darker border on active */
     color: white;
-    /* Text color on active */
 }
 
 .btn {
     padding: 0.375rem 0.75rem;
-    /* Vertical and horizontal padding */
     border-radius: 2rem;
-    /* Rounded corners */
     background-color: #ffffff;
     color: #311e0c;
     border-color: #ffffff;
@@ -188,43 +157,31 @@ body {
     border-color: #6c757d;
 }
 
-/* Add margin if needed */
 .me-2 {
     margin-right: 0.5rem;
-    /* Right margin */
+    
 }
 
-
-/* Specific styling for Spline container */
 .spline-container {
-    padding-top: 1.5rem;
-
+    padding-top: 0.5rem;
 }
-
 
 /* Container for the room status cards */
 .room-status-list {
     max-height: 580px;
     overflow-y: auto;
     border-radius: 2rem;
-    /* Rounded corners */
     background-color: #ffffff;
     padding: 2rem;
-    /* Padding inside the container */
 }
-
 
 /* Individual room status card styling */
 .room-status-card {
     background-color: #f8f3ed;
-    /* Card background color */
-    /* border: 1px solid #ced4da; Card border color */
     border-radius: 1.5rem;
-    /* Rounded corners */
     margin-bottom: 1rem;
-    /* Space between cards */
     padding: 1rem;
-    /* Padding inside the card */
+    line-height: 1rem;
 }
 
 /* Status dot styling */
@@ -233,9 +190,7 @@ body {
     width: 16px;
     height: 16px;
     border-radius: 50%;
-    /* Make it a circle */
     margin-right: 10px;
-    /* Space between dot and text */
 }
 
 /* Additional styles for confirmation messages */
@@ -245,20 +200,77 @@ body {
     left: 50%;
     transform: translateX(-50%);
     z-index: 1000;
-    /* Ensures the alert is on top */
 }
 
 .footer {
     padding: 10px 0;
-    /* Padding for the footer */
     position: relative;
-    /* Position relative for footer placement */
     bottom: 0;
-    /* Stick it to the bottom */
     width: 100%;
-    /* Full width */
     color: #6c757d;
-    /* Text color */
     font-size: 0.9rem;
-    /* Slightly smaller text */
+}
+
+/* Responsive design */
+
+/* Mobile (max-width: 576px) */
+@media (max-width: 576px) {
+    .botmaps-heading {
+        font-size: 1.5rem;
+        text-align: center;
+        padding-left: 0;
+    }
+
+    .bordered-container {
+        margin-bottom: 20px;
+    }
+}
+
+/* Tablet (max-width: 768px) */
+@media (max-width: 768px) {
+    .botmaps-heading {
+        font-size: 2rem;
+        text-align: center;
+    }
+}
+
+/* Desktop (min-width: 992px) */
+@media (min-width: 992px) {
+    .botmaps-heading {
+        font-size: 3rem;
+    }
+}
+
+/* Global responsive styles */
+html {
+    font-size: 100%;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.container {
+    max-width: 100%;
+    padding: 0 1rem;
+    margin: auto;
+}
+
+.datepicker-container,
+.room-status-card {
+    width: 100%;
+}
+
+/* Adjust the container height for smaller screens */
+@media (max-width: 768px) {
+    .flex-container {
+        flex-direction: column;
+    }
+
+    .bordered-container,
+    .room-status-list {
+        min-height: auto;
+    }
 }
