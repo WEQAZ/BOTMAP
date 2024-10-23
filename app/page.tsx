@@ -1,4 +1,3 @@
-// page.tsx
 "use client";
 import { useRef, useState, useEffect, Suspense } from "react";
 import Spline from "@splinetool/react-spline";
@@ -30,7 +29,7 @@ export default function Home() {
 
   useEffect(() => {
     if (splineApp) {
-      console.log("🚀 ~ useEffect ~ splineApp:", splineApp)
+      // console.log("🚀 ~ useEffect ~ splineApp:", splineApp)
       updateRoomColors(splineApp, objectStatuses);
     }
   }, [objectStatuses, splineApp]);
@@ -43,9 +42,12 @@ export default function Home() {
     async function getEvents() {
       try {
         const data = await fetchTeamupEvents(startDate, endDate);
-        const filteredData = data.events.filter((event) =>
-          event.location.startsWith("4")
-        );
+        const filteredData = data.events.filter((event) => {
+          const location = event.location;
+          // Regular expression to match "4XX", "4XXA", or "4XXB"
+          const regex = /^4\d{2}(A|B)?$/;
+          return regex.test(location);
+      });
         setEvents(filteredData);
         eventsRef.current = filteredData;
         console.log("Fetched events data:", filteredData);
@@ -86,7 +88,7 @@ export default function Home() {
   }
 
   function updateRoomColors(spline, statuses) {
-    console.log("🚀 ~ updateRoomColors ~ spline:", spline)
+    // console.log("🚀 ~ updateRoomColors ~ spline:", spline)
     
     if (!spline) {
       return;
@@ -94,11 +96,11 @@ export default function Home() {
 
     // Get all room objects that start with "4"
     const roomObjects = Object.keys(statuses).filter(room => room.startsWith('4'));
-    console.log("🚀 ~ updateRoomColors ~ roomObjects:", roomObjects)
+    // console.log("🚀 ~ updateRoomColors ~ roomObjects:", roomObjects)
     
     roomObjects.forEach(roomNumber => {
       const isOccupied = Array.isArray(statuses[roomNumber]) && statuses[roomNumber].length > 0;
-      console.log("🚀 ~ updateRoomColors ~ isOccupied:", isOccupied)
+      // console.log("🚀 ~ updateRoomColors ~ isOccupied:", isOccupied)
 
       try {
         // Get the room object from Spline
@@ -108,7 +110,7 @@ export default function Home() {
           // Set the variables for this specific room
           // When occupied: white = 100, green = 0
           // When available: white = 0, green = 100
-          spline.setVariable(`room${roomNumber}_unavailable`, isOccupied ? 89 : 0);
+          spline.setVariable(`room${roomNumber}_unavailable`, isOccupied ? 89: 0);
           spline.setVariable(`room${roomNumber}_available`, isOccupied ? 0 : 89);
         }
       } catch (error) {
@@ -123,11 +125,8 @@ export default function Home() {
     setSplineApp(spline);
 
     // Log available variables
-    console.log('🚀 ~ Available Spline variables:', spline.getVariables());
-    // console.log("🚀 ~ onSplineLoad ~ Object:", Object.entries(objectStatuses).map(([object, events]))
     // Initial color update when the scene loads
     if (Object.keys(objectStatuses).length > 0) {
-      console.log("🚀 ~ onSplineLoad ~ objectStatuses:", objectStatuses)
       updateRoomColors(spline, objectStatuses);
     } else {
       console.warn(`Could not update colors for room `);
@@ -169,18 +168,11 @@ export default function Home() {
       // // Show alert confirmation
       setShowSuccess(true);
       setTimeout(() => setShowSuccess(false), 3000); // Hide after 5 seconds
-      // window.alert(`Room ${selectedRoom} has been successfully reserved!`);
-
-      // // Set confirmation message for additional UI feedback (optional)
-      // setConfirmationMessage(`Room ${selectedRoom} has been successfully reserved!`);
-      // setShowConfirmation(true); // Show confirmation popup
-      // setTimeout(() => setShowConfirmation(false), 5000); // Hide after 5 seconds
+      
     } catch (error) {
       console.error("Error creating event:", error);
       // Show error message in the modal instead of closing it
       setShowFailure(true);
-      // setPopupMessage("Failed to reserve the room. Please try again.");
-      // setShowPopup(true); // Show error popup
       setTimeout(() => setShowFailure(false), 3000); // Hide after 5 seconds
     }
   }
@@ -205,14 +197,7 @@ export default function Home() {
     );
   }
 
-  // function handleDateChange(date) {
-  //   if (date) {
-  //     setCurrentTime(date);
-  //     currentTimeRef.current = date;
-  //     console.log(`Time updated to: ${date}`);
-  //     updateObjectStatuses(eventsRef.current, date);
-  //   }
-  // }
+
   function updateCurrentTime(time) {
     setCurrentTime(time);
     currentTimeRef.current = time;
@@ -287,7 +272,7 @@ export default function Home() {
                 <div className="spline-container">
                   <Suspense fallback={<div>Loading...</div>}>
                     <Spline
-                      scene="https://prod.spline.design/ug6H35mgX6bVfOkp/scene.splinecode"
+                      scene="https://prod.spline.design/2T5bXXYVeS5xBBXt/scene.splinecode"
                       onSplineMouseDown={onSplineMouseDown}
                       onLoad={onSplineLoad}
                     />
@@ -304,6 +289,7 @@ export default function Home() {
                     onSubmit={handleReservationSubmit}
                     selectedRoom={selectedRoom}
                     currentTime={currentTime}
+                    
                   />
 
                   {showConfirmation && (
@@ -396,7 +382,8 @@ export default function Home() {
 
     </main>
   );
-      return filteredEvents
+  function createPopupContent(filteredEvents) {
+    return filteredEvents
       .map((event) => {
         console.log("Event:", event);
         // Extract the contact name and phone number from the 'who' field
@@ -441,4 +428,3 @@ export default function Home() {
   }
 
 }
-
